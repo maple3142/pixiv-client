@@ -1,0 +1,11 @@
+{
+	"name": "pixiv-client",
+	"version": "0.0.1",
+	"main": "index.js",
+	"license": "MIT",
+	"dependencies": {
+		"cheerio": "^1.0.0-rc.2",
+		"got": "^9.3.2",
+		"tough-cookie": "^2.4.3"
+	}
+}
