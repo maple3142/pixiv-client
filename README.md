@@ -1,5 +1,7 @@
 # pixiv-client
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/maple3142/pixiv-client.svg)](https://greenkeeper.io/)
+
 ## Example
 
 ```js
