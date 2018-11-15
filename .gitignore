@@ -76,4 +76,4 @@ typings/
 .fusebox/
 
 # Local testing script
-test.js
+test.ts

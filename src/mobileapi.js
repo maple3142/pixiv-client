@@ -14,6 +14,7 @@ const obj2fd = obj => {
 
 class MobileApi {
 	constructor({ acc, pwd, oauthinfo }) {
+		this.currentUser = oauthinfo.user
 		this.oauthinfo = oauthinfo
 		this.mclient = got.extend({
 			headers: {
@@ -61,9 +62,6 @@ class MobileApi {
 	}
 	getIllusts(userId) {
 		return this.mgetJson('/user/illusts', { query: { user_id: userId, filter: 'for_ios', type: 'illust' } })
-	}
-	get user(){
-		return this.oauthinfo.user
 	}
 	static async auth(acc, pwd, refresh_token) {
 		try {

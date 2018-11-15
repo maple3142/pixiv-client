@@ -1,14 +1,15 @@
+type Id = string | number
 interface DesktopApi {
-	getIllustData(illustId: string | number): Promise<any>
-	getIllustBookmarkData(illustId: string | number): Promise<any>
-	getUserData(userId: string | number): Promise<any>
-	getUserProfileData(userId: string | number): Promise<any>
-	getUserBookmarkData(userId: string | number, optSearchParams?: object): Promise<any>
-	getIllustUgoiraMetaData(illustId: string | number): Promise<any>
-	postIllustLike(illustId: string | number): Promise<any>
-	postFollowUser(userId: string | number): Promise<any>
-	postRPCAddBookmark(illustId: string | number): Promise<any>
-	postRPCDeleteBookmark(bookmarkId: string | number): Promise<any>
+	getIllustData(illustId: Id): Promise<any>
+	getIllustBookmarkData(illustId: Id): Promise<any>
+	getUserData(userId: Id): Promise<any>
+	getUserProfileData(userId: Id): Promise<any>
+	getUserBookmarkData(userId: Id, optSearchParams?: object): Promise<any>
+	getIllustUgoiraMetaData(illustId: Id): Promise<any>
+	postIllustLike(illustId: Id): Promise<any>
+	postFollowUser(userId: Id): Promise<any>
+	postRPCAddBookmark(illustId: Id): Promise<any>
+	postRPCDeleteBookmark(bookmarkId: Id): Promise<any>
 }
 interface UserData {
 	profile_image_urls: object
@@ -34,11 +35,11 @@ type RankingMode =
 	| 'week_r18'
 	| 'week_r18g'
 interface MobileApi {
-	getRanking(mode: RankingMode, date: Date): Promise<any>
-	getBookmarks(userId: string | number): Promise<any>
-	getUserDetail(userId: string | number): Promise<any>
-	getIllusts(userId: string | number): Promise<any>
-	user: UserData
+	getRanking(mode: RankingMode, date?: Date): Promise<any>
+	getBookmarks(userId: Id): Promise<any>
+	getUserDetail(userId: Id): Promise<any>
+	getIllusts(userId: Id): Promise<any>
+	currentUser: UserData
 }
 interface Pixiv extends DesktopApi, MobileApi {}
 declare class Pixiv {

@@ -1,6 +1,6 @@
 const DesktopApi = require('./desktopapi')
 const MobileApi = require('./mobileapi')
-const { inherits } = require('util')
+const { mixin } = require('./utils')
 
 class Pixiv {
 	constructor(options) {
@@ -16,7 +16,6 @@ class Pixiv {
 	}
 }
 
-inherits(Pixiv, DesktopApi)
-inherits(Pixiv, MobileApi)
+mixin(Pixiv, DesktopApi, MobileApi)
 
 module.exports = Pixiv

@@ -8,7 +8,7 @@
   console.log(await client.postIllustLike(70337017))
   console.log(await client.getUserProfileData(5323203))
   console.log(await client.getRanking('day'))
-  console.log(await client.getBookmarks(p.user.id))
+  console.log(await client.getBookmarks(client.currentUser.id))
 })()
 ```
 
