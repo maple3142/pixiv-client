@@ -12,16 +12,18 @@ const obj2fd = obj => {
 	return fd
 }
 
+const filter = 'for_ios' // filter parameter
+
 class PixivMobileApi {
 	constructor({ username, password, oauthinfo }) {
 		this.currentUser = oauthinfo.user
 		this.oauthinfo = oauthinfo
-		this.mclient = got.extend({
+		this.client = got.extend({
 			headers: {
 				Authorization: `Bearer ${oauthinfo.access_token}`,
 				...constants.maskHeaders
 			},
-			baseUrl: 'https://app-api.pixiv.net/v1'
+			baseUrl: 'https://app-api.pixiv.net/'
 		})
 		this.oauthtime = Date.now()
 		this.username = username
@@ -40,32 +42,94 @@ class PixivMobileApi {
 	responseHandler(resp) {
 		return resp.body
 	}
-	async getJson(url, opts) {
+	async getJson(url, query) {
 		await this.checkAndRefreshToken()
-		return this.mclient.get(url, Object.assign({ json: true }, opts)).then(this.responseHandler)
+		return this.client.get(url, { json: true, query }).then(this.responseHandler)
 	}
-	async postJson(url, opts) {
+	async postJson(url, params) {
 		await this.checkAndRefreshToken()
-		return this.mclient.post(url, Object.assign({ json: true }, opts)).then(this.responseHandler)
+		return this.client.post(url, { json: true, form: true, body: params }).then(this.responseHandler)
+	}
+	hasNext(resp) {
+		return !!resp.next_url
+	}
+	next(resp) {
+		return this.getJson(resp.next_url)
+	}
+	searchIllust(keyword, { searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration } = {}) {
+		const query = {
+			word: keyword,
+			search_target: searchTarget,
+			sort,
+			filter
+		}
+		if (duration) {
+			query.duration = duration
+		}
+		return this.getJson('/v1/search/illust', query)
+	}
+	searchUser(keyword) {
+		return this.getJson('/v1/search/user', { word: keyword, filter })
 	}
 	getRanking(mode, date) {
 		const query = {
 			mode,
-			filter: 'for_ios'
+			filter
 		}
 		if (date) {
 			query.date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 		}
-		return this.getJson('/illust/ranking', { query })
+		return this.getJson('/v1/illust/ranking', query)
 	}
-	getBookmarks(userId) {
-		return this.getJson('/user/bookmarks/illust', { query: { user_id: userId, restrict: 'public' } })
+	getTrendingTags() {
+		return this.getJson('/v1/trending-tags/illust', { filter })
+	}
+	getUserBookmarks(userId) {
+		return this.getJson('/v1/user/bookmarks/illust', { user_id: userId, restrict: 'public' })
 	}
 	getUserDetail(userId) {
-		return this.getJson('/user/detail', { query: { user_id: userId } })
+		return this.getJson('/v1/user/detail', { user_id: userId })
+	}
+	getUserMypixiv(userId) {
+		return this.getJson('/v1/user/mypixiv', { user_id: userId })
+	}
+	getUserFollowers(userId) {
+		return this.getJson('/v1/user/follower', { user_id: userId })
+	}
+	getUserFollowings(userId) {
+		return this.getJson('/v1/user/following', { user_id: userId })
 	}
 	getIllusts(userId) {
-		return this.getJson('/user/illusts', { query: { user_id: userId, filter: 'for_ios', type: 'illust' } })
+		return this.getJson('/v1/user/illusts', { user_id: userId, filter, type: 'illust' })
+	}
+	getNewIllusts() {
+		return this.getJson('/v1/illust/new')
+	}
+	getRecommendedIllusts() {
+		return this.getJson('/v1/illust/recommended', { content_type: 'illust', include_ranking_label: 'true', filter })
+	}
+	getFollowingIllusts() {
+		return this.getJson('/v2/illust/follow', { restrict: 'public' })
+	}
+	getIllustDetail(illustId) {
+		return this.getJson('/v1/illust/detail', { illust_id: illustId, filter })
+	}
+	getIllustComment(illustId) {
+		return this.getJson('/v1/illust/comments', { illust_id: illustId, include_total_comments: true })
+	}
+	getIllustRelated(illustId) {
+		return this.getJson('/v2/illust/related', { illust_id: illustId, filter })
+	}
+	addBookmark(illustId, public_mode) {
+		return this.postJson('/v2/illust/bookmark/add', {
+			illust_id: illustId,
+			restrict: public_mode ? 'public' : 'private'
+		})
+	}
+	deleteBookmark(illustId) {
+		return this.postJson('/v1/illust/bookmark/delete', {
+			illust_id: illustId
+		})
 	}
 	static async auth({ username, password, refresh_token }) {
 		try {

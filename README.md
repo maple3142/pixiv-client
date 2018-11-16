@@ -20,7 +20,13 @@ const { PixivDesktopApi, PixivMobileApi } = require('pixiv-client')
   console.log(await dc.getUserProfileData(5323203))
   const mc = await PixivMobileApi.login(auth)
   console.log(await mc.getRanking('day'))
-  console.log(await mc.getBookmarks(mc.currentUser.id))
+  const bm = await mc.getUserBookmarks(mc.currentUser.id)
+  if (mc.hasNext(bm)) {
+    console.log(await mc.next(bm))
+  }
+  else{
+    console.log(bm)
+  }
 })()
 ```
 

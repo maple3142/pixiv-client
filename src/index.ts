@@ -1,5 +1,5 @@
 type Id = string | number
-interface LoginOption{
+interface LoginOption {
 	username: string
 	password: string
 }
@@ -39,11 +39,32 @@ type RankingMode =
 	| 'day_female_r18'
 	| 'week_r18'
 	| 'week_r18g'
+interface SearchOption {
+	searchTarget?: 'partial_match_for_tags' | 'exact_match_for_tags' | 'title_and_caption'
+	sort?: 'date_desc' | 'date_asc'
+	duration?: 'within_last_day' | 'within_last_week' | 'within_last_month'
+}
 export declare class PixivMobileApi {
+	hasNext(resp: object): Promise<any>
+	next(resp: object): Promise<any>
+	searchIllust(keyword: string, opts?: SearchOption): Promise<any>
+	searchUser(keyword: string): Promise<any>
 	getRanking(mode: RankingMode, date?: Date): Promise<any>
-	getBookmarks(userId: Id): Promise<any>
+	getTrendingTags(): Promise<any>
+	getUserBookmarks(userId: Id): Promise<any>
 	getUserDetail(userId: Id): Promise<any>
+	getUserMypixiv(userId: Id): Promise<any>
+	getUserFollowers(userId: Id): Promise<any>
+	getUserFollowings(userId: Id): Promise<any>
 	getIllusts(userId: Id): Promise<any>
+	getNewIllusts(): Promise<any>
+	getRecommendedIllusts(): Promise<any>
+	getFollowingIllusts(): Promise<any>
+	getIllustDetail(illustId: Id): Promise<any>
+	getIllustComment(illustId: Id): Promise<any>
+	getIllustRelated(illustId: Id): Promise<any>
+	addBookmark(illustId: Id, public_mode?: boolean): Promise<any>
+	deleteBookmark(illustId: Id): Promise<any>
 	currentUser: UserData
 	static login(opts: LoginOption): PixivMobileApi
 }
