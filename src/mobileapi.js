@@ -12,8 +12,8 @@ const obj2fd = obj => {
 	return fd
 }
 
-class MobileApi {
-	constructor({ acc, pwd, oauthinfo }) {
+class PixivMobileApi {
+	constructor({ username, password, oauthinfo }) {
 		this.currentUser = oauthinfo.user
 		this.oauthinfo = oauthinfo
 		this.mclient = got.extend({
@@ -23,26 +23,30 @@ class MobileApi {
 			},
 			baseUrl: 'https://app-api.pixiv.net/v1'
 		})
-		this.oauthTime = Date.now()
-		this.acc = acc
-		this.pwd = pwd
+		this.oauthtime = Date.now()
+		this.username = username
+		this.password = password
 	}
-	async checkToken() {
-		const tokenHasExpired = Date.now() - this.oauthTime > this.oauthinfo.expires_in * 0.9
+	async checkAndRefreshToken() {
+		const tokenHasExpired = Date.now() - this.oauthtime > this.oauthinfo.expires_in * 0.9
 		if (tokenHasExpired) {
-			this.oauthinfo = await PixivMobile.auth(this.acc, this.pwd, this.oauthinfo.refresh_token)
+			this.oauthinfo = await PixivMobile.auth({
+				username: this.username,
+				password: this.password,
+				refresh_token: this.oauthinfo.refresh_token
+			})
 		}
 	}
-	mresponseHandler(resp) {
+	responseHandler(resp) {
 		return resp.body
 	}
-	async mgetJson(url, opts) {
-		await this.checkToken()
-		return this.mclient.get(url, Object.assign({ json: true }, opts)).then(this.mresponseHandler)
+	async getJson(url, opts) {
+		await this.checkAndRefreshToken()
+		return this.mclient.get(url, Object.assign({ json: true }, opts)).then(this.responseHandler)
 	}
-	async mpostJson(url, opts) {
-		await this.checkToken()
-		return this.mclient.post(url, Object.assign({ json: true }, opts)).then(this.mresponseHandler)
+	async postJson(url, opts) {
+		await this.checkAndRefreshToken()
+		return this.mclient.post(url, Object.assign({ json: true }, opts)).then(this.responseHandler)
 	}
 	getRanking(mode, date) {
 		const query = {
@@ -52,24 +56,22 @@ class MobileApi {
 		if (date) {
 			query.date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 		}
-		return this.mgetJson('/illust/ranking', { query })
+		return this.getJson('/illust/ranking', { query })
 	}
 	getBookmarks(userId) {
-		return this.mgetJson('/user/bookmarks/illust', { query: { user_id: userId, restrict: 'public' } })
+		return this.getJson('/user/bookmarks/illust', { query: { user_id: userId, restrict: 'public' } })
 	}
 	getUserDetail(userId) {
-		return this.mgetJson('/user/detail', { query: { user_id: userId } })
+		return this.getJson('/user/detail', { query: { user_id: userId } })
 	}
 	getIllusts(userId) {
-		return this.mgetJson('/user/illusts', { query: { user_id: userId, filter: 'for_ios', type: 'illust' } })
+		return this.getJson('/user/illusts', { query: { user_id: userId, filter: 'for_ios', type: 'illust' } })
 	}
-	static async auth(acc, pwd, refresh_token) {
+	static async auth({ username, password, refresh_token }) {
 		try {
 			const obj = {
 				client_id: constants.client_id,
 				client_secret: constants.client_secret,
-				username: acc,
-				password: pwd,
 				get_secure_url: 1
 			}
 			if (refresh_token) {
@@ -77,6 +79,8 @@ class MobileApi {
 				obj.refresh_token = refresh_token
 			} else {
 				obj.grant_type = 'password'
+				obj.username = username
+				obj.password = password
 			}
 			const resp = await got
 				.post('https://oauth.secure.pixiv.net/auth/token', {
@@ -89,6 +93,10 @@ class MobileApi {
 			throw new Error('Login failed!')
 		}
 	}
+	static async login(opts) {
+		const oauthinfo = await PixivMobileApi.auth(opts)
+		return new PixivMobileApi(Object.assign({}, opts, { oauthinfo }))
+	}
 }
 
-module.exports = MobileApi
+module.exports = PixivMobileApi

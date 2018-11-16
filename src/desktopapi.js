@@ -4,8 +4,8 @@ const { CookieJar } = require('tough-cookie')
 
 // Desktop Pixiv api docs: https://github.com/FlandreDaisuki/Patchouli/wiki/New-API-List
 
-class DesktopApi {
-	constructor({ cookieJar}) {
+class PixivDesktopApi {
+	constructor({ cookieJar }) {
 		this.cookieJar = cookieJar
 		this.client = got.extend({ cookieJar, baseUrl: 'https://www.pixiv.net/' })
 	}
@@ -113,7 +113,7 @@ class DesktopApi {
 	postRPCDeleteBookmark(bookmarkId) {
 		return this.rpcCall('delete_illust_bookmark', { bookmark_id: bookmarkId }).then(() => true)
 	}
-	static async login(acc, pwd) {
+	static async auth({ username, password }) {
 		const cookieJar = new CookieJar()
 		const client = got.extend({
 			cookieJar,
@@ -128,8 +128,8 @@ class DesktopApi {
 		const resp = await client.post('/api/login', {
 			form: true,
 			body: {
-				pixiv_id: acc,
-				password: pwd,
+				pixiv_id: username,
+				password: password,
 				post_key
 			}
 		})
@@ -139,6 +139,9 @@ class DesktopApi {
 			throw new Error('Login failed!')
 		}
 	}
+	static async login(opts) {
+		return new PixivDesktopApi({ cookieJar: await PixivDesktopApi.auth(opts) })
+	}
 }
 
-module.exports = DesktopApi
+module.exports = PixivDesktopApi

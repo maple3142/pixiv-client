@@ -1,5 +1,9 @@
 type Id = string | number
-interface DesktopApi {
+interface LoginOption{
+	username: string
+	password: string
+}
+export declare class PixivDesktopApi {
 	getIllustData(illustId: Id): Promise<any>
 	getIllustBookmarkData(illustId: Id): Promise<any>
 	getUserData(userId: Id): Promise<any>
@@ -10,6 +14,7 @@ interface DesktopApi {
 	postFollowUser(userId: Id): Promise<any>
 	postRPCAddBookmark(illustId: Id): Promise<any>
 	postRPCDeleteBookmark(bookmarkId: Id): Promise<any>
+	static login(opts: LoginOption): PixivDesktopApi
 }
 interface UserData {
 	profile_image_urls: object
@@ -34,15 +39,11 @@ type RankingMode =
 	| 'day_female_r18'
 	| 'week_r18'
 	| 'week_r18g'
-interface MobileApi {
+export declare class PixivMobileApi {
 	getRanking(mode: RankingMode, date?: Date): Promise<any>
 	getBookmarks(userId: Id): Promise<any>
 	getUserDetail(userId: Id): Promise<any>
 	getIllusts(userId: Id): Promise<any>
 	currentUser: UserData
+	static login(opts: LoginOption): PixivMobileApi
 }
-interface Pixiv extends DesktopApi, MobileApi {}
-declare class Pixiv {
-	static login(acc: string, pwd: string): Promise<Pixiv>
-}
-export = Pixiv
