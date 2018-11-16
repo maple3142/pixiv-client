@@ -14,7 +14,7 @@ export declare class PixivDesktopApi {
 	postFollowUser(userId: Id): Promise<any>
 	postRPCAddBookmark(illustId: Id): Promise<any>
 	postRPCDeleteBookmark(bookmarkId: Id): Promise<any>
-	static login(opts: LoginOption): PixivDesktopApi
+	static login(opts: LoginOption): Promise<PixivDesktopApi>
 }
 interface UserData {
 	profile_image_urls: object
@@ -66,5 +66,5 @@ export declare class PixivMobileApi {
 	addBookmark(illustId: Id, public_mode?: boolean): Promise<any>
 	deleteBookmark(illustId: Id): Promise<any>
 	currentUser: UserData
-	static login(opts: LoginOption): PixivMobileApi
+	static login(opts: LoginOption): Promise<PixivMobileApi>
 }
