@@ -84,6 +84,9 @@ class PixivMobileApi {
 	getTrendingTags() {
 		return this.getJson('/v1/trending-tags/illust', { filter })
 	}
+	getBookmarkTags(publicMode = true) {
+		return this.getJson('/v1/user/bookmark-tags/illust', { restrict: publicMode ? 'public' : 'private' })
+	}
 	getUserBookmarks(userId) {
 		return this.getJson('/v1/user/bookmarks/illust', { user_id: userId, restrict: 'public' })
 	}
@@ -105,8 +108,12 @@ class PixivMobileApi {
 	getNewIllusts() {
 		return this.getJson('/v1/illust/new')
 	}
-	getRecommendedIllusts() {
-		return this.getJson('/v1/illust/recommended', { content_type: 'illust', include_ranking_label: 'true', filter })
+	getRecommendedIllusts({ includeRanking = true } = {}) {
+		return this.getJson('/v1/illust/recommended', {
+			content_type: 'illust',
+			include_ranking_label: includeRanking,
+			filter
+		})
 	}
 	getFollowingIllusts() {
 		return this.getJson('/v2/illust/follow', { restrict: 'public' })
@@ -120,15 +127,27 @@ class PixivMobileApi {
 	getIllustRelated(illustId) {
 		return this.getJson('/v2/illust/related', { illust_id: illustId, filter })
 	}
-	addBookmark(illustId, public_mode) {
+	addBookmark(illustId, { publicMode = true } = {}) {
 		return this.postJson('/v2/illust/bookmark/add', {
 			illust_id: illustId,
-			restrict: public_mode ? 'public' : 'private'
+			restrict: publicMode ? 'public' : 'private'
 		})
 	}
 	deleteBookmark(illustId) {
 		return this.postJson('/v1/illust/bookmark/delete', {
 			illust_id: illustId
+		})
+	}
+	getRecommendedNovels({ includeRanking = true } = {}) {
+		return this.getJson('/v1/novel/recommended', {
+			include_ranking_novels: includeRanking,
+			filter
+		})
+	}
+	getRecommendedMangas({ includeRanking = true } = {}) {
+		return this.getJson('/v1/manga/recommended', {
+			include_ranking_label: includeRanking,
+			filter
 		})
 	}
 	static async auth({ username, password, refresh_token }) {
