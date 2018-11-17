@@ -1,10 +1,12 @@
+import { Illust } from './illust'
+
 type Id = string | number
 interface LoginOption {
 	username: string
 	password: string
 }
 export declare class PixivDesktopApi {
-	getIllustData(illustId: Id): Promise<any>
+	getIllustData(illustId: Id): Promise<Illust>
 	getIllustBookmarkData(illustId: Id): Promise<any>
 	getUserData(userId: Id): Promise<any>
 	getUserProfileData(userId: Id): Promise<any>

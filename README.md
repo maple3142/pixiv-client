@@ -6,9 +6,9 @@
 
 ```js
 // ES6:
-import { PixivDesktopApi, PixivMobileApi } from 'pixiv-client'
+import { PixivDesktopApi, PixivMobileApi, download } from 'pixiv-client'
 // Commomjs:
-const { PixivDesktopApi, PixivMobileApi } = require('pixiv-client')
+const { PixivDesktopApi, PixivMobileApi, download } = require('pixiv-client')
 
 ;(async () => {
   const auth = {
@@ -16,7 +16,8 @@ const { PixivDesktopApi, PixivMobileApi } = require('pixiv-client')
     password: 'PASSWORD'
   }
   const dc = await PixivDesktopApi.login(auth)
-  console.log(await dc.postIllustLike(70337017))
+  const r = await dc.getIllustData(70337017)
+  download(r.urls.original).pipe(fs.createWriteStream(__dirname + 'test.png')) // or `await download(r.urls.original, __dirname + 'test.png')`
   console.log(await dc.getUserProfileData(5323203))
   const mc = await PixivMobileApi.login(auth)
   console.log(await mc.getRanking('day'))
@@ -32,6 +33,6 @@ const { PixivDesktopApi, PixivMobileApi } = require('pixiv-client')
 
 ## Documentation
 
-[index.ts](./src/index.ts)
+[Typescript definitions](./src/types)
 
 > Although there is lots of undocumented api if you inspect the api client, you should not use it because it won't follow semver.

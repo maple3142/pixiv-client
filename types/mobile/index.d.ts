@@ -1,4 +1,5 @@
 import { Illust } from './illust'
+
 type Id = string | number
 interface UserData {
 	profile_image_urls: object
