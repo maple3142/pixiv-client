@@ -75,5 +75,5 @@ typings/
 # FuseBox cache
 .fusebox/
 
-# Local testing script
-test.ts
+# Local testing scripts
+tmp

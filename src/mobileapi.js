@@ -2,7 +2,7 @@ const got = require('got')
 const FormData = require('form-data')
 const constants = require('./constants')
 
-// Mobile Pixiv api reference: https://github.com/DIYgod/RSSHub/blob/master/routes/pixiv
+// Mobile Pixiv api reference: https://github.com/upbit/pixivpy/wiki
 
 const obj2fd = obj => {
 	const fd = new FormData()
@@ -17,26 +17,32 @@ const filter = 'for_ios' // filter parameter
 class PixivMobileApi {
 	constructor({ username, password, oauthinfo }) {
 		this.currentUser = oauthinfo.user
-		this.oauthinfo = oauthinfo
+		this.oauth = {
+			info: oauthinfo,
+			time: Date.now()
+		}
+		this.updateClientWithToken(this.oauth.info.access_token)
+		this.username = username
+		this.password = password
+	}
+	updateClientWithToken(accessToken) {
 		this.client = got.extend({
 			headers: {
-				Authorization: `Bearer ${oauthinfo.access_token}`,
+				Authorization: `Bearer ${accessToken}`,
 				...constants.maskHeaders
 			},
 			baseUrl: 'https://app-api.pixiv.net/'
 		})
-		this.oauthtime = Date.now()
-		this.username = username
-		this.password = password
 	}
 	async checkAndRefreshToken() {
-		const tokenHasExpired = Date.now() - this.oauthtime > this.oauthinfo.expires_in * 0.9
+		const tokenHasExpired = Date.now() - this.oauth.time > this.oauth.info.expires_in * 0.9
 		if (tokenHasExpired) {
-			this.oauthinfo = await PixivMobile.auth({
+			this.oauth.info = await PixivMobile.auth({
 				username: this.username,
 				password: this.password,
-				refresh_token: this.oauthinfo.refresh_token
+				refresh_token: this.oauth.info.refresh_token
 			})
+			this.updateClientOauthinfo(this.oauthinfo.access_token)
 		}
 	}
 	responseHandler(resp) {
