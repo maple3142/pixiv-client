@@ -44,9 +44,9 @@ interface IllustResponse extends ApiResponse {
 export declare class PixivMobileApi {
 	hasNext(resp: ApiResponse): Promise<ApiResponse>
 	next(resp: ApiResponse): Promise<ApiResponse>
-	searchIllust(keyword: string, opts?: ExtendedSearchOption): Promise<RankingOrSearchResponse>
-	searchPopularIllust(keyword: string, opts?: SearchOption): Promise<RankingOrSearchResponse>
-	searchUser(keyword: string): Promise<ApiResponse>
+	searchIllusts(keyword: string, opts?: ExtendedSearchOption): Promise<RankingOrSearchResponse>
+	searchPopularIllusts(keyword: string, opts?: SearchOption): Promise<RankingOrSearchResponse>
+	searchUsers(keyword: string): Promise<ApiResponse>
 	getRanking(mode: RankingMode, date?: Date): Promise<RankingOrSearchResponse>
 	getBookmarkTags(opts?: { publicMode: boolean }): Promise<ApiResponse>
 	getTrendingTags(): Promise<ApiResponse>

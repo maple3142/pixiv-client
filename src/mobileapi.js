@@ -62,7 +62,7 @@ class PixivMobileApi {
 	next(resp) {
 		return this.getJson(resp.next_url)
 	}
-	searchIllust(keyword, { searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration } = {}) {
+	searchIllusts(keyword, { searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration } = {}) {
 		const query = {
 			word: keyword,
 			search_target: searchTarget,
@@ -74,7 +74,7 @@ class PixivMobileApi {
 		}
 		return this.getJson('/v1/search/illust', query)
 	}
-	searchPopularIllust(keyword, { searchTarget = 'partial_match_for_tags'} = {}) {
+	searchPopularIllusts(keyword, { searchTarget = 'partial_match_for_tags'} = {}) {
 		const query = {
 			word: keyword,
 			search_target: searchTarget,
@@ -82,7 +82,7 @@ class PixivMobileApi {
 		}
 		return this.getJson('/v1/search/popular-preview/illust', query)
 	}
-	searchUser(keyword) {
+	searchUsers(keyword) {
 		return this.getJson('/v1/search/user', { word: keyword, filter })
 	}
 	getRanking(mode, date) {
