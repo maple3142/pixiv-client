@@ -26,6 +26,8 @@ type RankingMode =
 	| 'week_r18g'
 interface SearchOption {
 	searchTarget?: 'partial_match_for_tags' | 'exact_match_for_tags' | 'title_and_caption'
+}
+interface ExtendedSearchOption extends SearchOption {
 	sort?: 'date_desc' | 'date_asc'
 	duration?: 'within_last_day' | 'within_last_week' | 'within_last_month'
 }
@@ -33,18 +35,19 @@ interface ApiResponse {
 	next_url: string | null
 	[key: string]: any
 }
-interface RankingResponse extends ApiResponse{
+interface RankingOrSearchResponse extends ApiResponse {
 	illusts: [Illust]
 }
-interface IllustResponse extends ApiResponse{
+interface IllustResponse extends ApiResponse {
 	illust: Illust
 }
 export declare class PixivMobileApi {
 	hasNext(resp: ApiResponse): Promise<ApiResponse>
 	next(resp: ApiResponse): Promise<ApiResponse>
-	searchIllust(keyword: string, opts?: SearchOption): Promise<ApiResponse>
+	searchIllust(keyword: string, opts?: ExtendedSearchOption): Promise<RankingOrSearchResponse>
+	searchPopularIllust(keyword: string, opts?: SearchOption): Promise<RankingOrSearchResponse>
 	searchUser(keyword: string): Promise<ApiResponse>
-	getRanking(mode: RankingMode, date?: Date): Promise<RankingResponse>
+	getRanking(mode: RankingMode, date?: Date): Promise<RankingOrSearchResponse>
 	getBookmarkTags(opts?: { publicMode: boolean }): Promise<ApiResponse>
 	getTrendingTags(): Promise<ApiResponse>
 	getUserBookmarks(userId: Id): Promise<ApiResponse>

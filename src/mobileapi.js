@@ -74,6 +74,14 @@ class PixivMobileApi {
 		}
 		return this.getJson('/v1/search/illust', query)
 	}
+	searchPopularIllust(keyword, { searchTarget = 'partial_match_for_tags'} = {}) {
+		const query = {
+			word: keyword,
+			search_target: searchTarget,
+			filter
+		}
+		return this.getJson('/v1/search/popular-preview/illust', query)
+	}
 	searchUser(keyword) {
 		return this.getJson('/v1/search/user', { word: keyword, filter })
 	}
