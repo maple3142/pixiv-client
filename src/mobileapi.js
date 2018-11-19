@@ -22,8 +22,6 @@ class PixivMobileApi {
 			time: Date.now()
 		}
 		this.updateClientWithToken(this.oauth.info.access_token)
-		this.username = username
-		this.password = password
 	}
 	updateClientWithToken(accessToken) {
 		this.client = got.extend({
@@ -35,14 +33,12 @@ class PixivMobileApi {
 		})
 	}
 	async checkAndRefreshToken() {
-		const tokenHasExpired = Date.now() - this.oauth.time > this.oauth.info.expires_in * 0.9
+		const tokenHasExpired = Date.now() - this.oauth.time > this.oauth.info.expires_in * 1000 * 0.9
 		if (tokenHasExpired) {
-			this.oauth.info = await PixivMobile.auth({
-				username: this.username,
-				password: this.password,
+			this.oauth.info = await PixivMobileApi.auth({
 				refresh_token: this.oauth.info.refresh_token
 			})
-			this.updateClientOauthinfo(this.oauthinfo.access_token)
+			this.updateClientWithToken(this.oauth.info.access_token)
 		}
 	}
 	responseHandler(resp) {
@@ -74,7 +70,7 @@ class PixivMobileApi {
 		}
 		return this.getJson('/v1/search/illust', query)
 	}
-	searchPopularIllusts(keyword, { searchTarget = 'partial_match_for_tags'} = {}) {
+	searchPopularIllusts(keyword, { searchTarget = 'partial_match_for_tags' } = {}) {
 		const query = {
 			word: keyword,
 			search_target: searchTarget,
