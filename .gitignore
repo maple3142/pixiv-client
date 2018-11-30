@@ -77,3 +77,6 @@ typings/
 
 # Local testing scripts
 tmp
+
+# Distribution files
+dist

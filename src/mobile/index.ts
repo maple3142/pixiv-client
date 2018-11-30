@@ -1,10 +1,21 @@
-const got = require('got')
-const FormData = require('form-data')
-const constants = require('./constants')
+import * as got from 'got'
+import * as FormData from 'form-data'
+import constants from '../constants'
+import {
+	UserData,
+	ApiResponse,
+	ExtendedSearchOption,
+	Params,
+	RankingMode,
+	RankingOrSearchResponse,
+	UsernameAuth,
+	RefreshAuth,
+	Oauth
+} from './types'
 
 // Mobile Pixiv api reference: https://github.com/upbit/pixivpy/wiki
 
-const obj2fd = obj => {
+const obj2fd = (obj: object) => {
 	const fd = new FormData()
 	for (const [k, v] of Object.entries(obj)) {
 		fd.append(k, v)
@@ -14,17 +25,20 @@ const obj2fd = obj => {
 
 const filter = 'for_ios' // filter parameter
 
-class PixivMobileApi {
-	constructor({ username, password, oauthinfo }) {
-		this.currentUser = oauthinfo.user
+type Id = string | number
+
+export class PixivMobileApi {
+	public oauth: Oauth
+	private client: any
+	constructor({ oauthinfo }: { username: string; password: string; oauthinfo: any }) {
 		this.oauth = {
 			info: oauthinfo,
 			time: Date.now()
 		}
 		this.updateClientWithToken(this.oauth.info.access_token)
 	}
-	updateClientWithToken(accessToken) {
-		this.client = got.extend({
+	private updateClientWithToken(accessToken: string) {
+		this.client = (<any>got).extend({
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 				...constants.maskHeaders
@@ -41,25 +55,28 @@ class PixivMobileApi {
 			this.updateClientWithToken(this.oauth.info.access_token)
 		}
 	}
-	responseHandler(resp) {
+	responseHandler(resp: { body: any }) {
 		return resp.body
 	}
-	async getJson(url, query) {
+	async getJson(url: string, query?: object) {
 		await this.checkAndRefreshToken()
 		return this.client.get(url, { json: true, query }).then(this.responseHandler)
 	}
-	async postJson(url, params) {
+	async postJson(url: string, params?: object) {
 		await this.checkAndRefreshToken()
 		return this.client.post(url, { json: true, form: true, body: params }).then(this.responseHandler)
 	}
-	hasNext(resp) {
+	hasNext(resp: ApiResponse): boolean {
 		return !!resp.next_url
 	}
-	next(resp) {
+	next(resp: ApiResponse): Promise<ApiResponse> {
 		return this.getJson(resp.next_url)
 	}
-	searchIllusts(keyword, { searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration } = {}) {
-		const query = {
+	searchIllusts(
+		keyword: string,
+		{ searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration }: ExtendedSearchOption
+	): Promise<RankingOrSearchResponse> {
+		const query: Params = {
 			word: keyword,
 			search_target: searchTarget,
 			sort,
@@ -70,7 +87,10 @@ class PixivMobileApi {
 		}
 		return this.getJson('/v1/search/illust', query)
 	}
-	searchPopularIllusts(keyword, { searchTarget = 'partial_match_for_tags' } = {}) {
+	searchPopularIllusts(
+		keyword: string,
+		{ searchTarget = 'partial_match_for_tags' } = {}
+	): Promise<RankingOrSearchResponse> {
 		const query = {
 			word: keyword,
 			search_target: searchTarget,
@@ -78,11 +98,11 @@ class PixivMobileApi {
 		}
 		return this.getJson('/v1/search/popular-preview/illust', query)
 	}
-	searchUsers(keyword) {
+	searchUsers(keyword: string): Promise<ApiResponse> {
 		return this.getJson('/v1/search/user', { word: keyword, filter })
 	}
-	getRanking(mode, date) {
-		const query = {
+	getRanking(mode: RankingMode, date?: Date): Promise<RankingOrSearchResponse> {
+		const query: Params = {
 			mode,
 			filter
 		}
@@ -91,90 +111,88 @@ class PixivMobileApi {
 		}
 		return this.getJson('/v1/illust/ranking', query)
 	}
-	getTrendingTags() {
+	getTrendingTags(): Promise<ApiResponse> {
 		return this.getJson('/v1/trending-tags/illust', { filter })
 	}
-	getBookmarkTags(publicMode = true) {
+	getBookmarkTags(publicMode = true): Promise<ApiResponse> {
 		return this.getJson('/v1/user/bookmark-tags/illust', { restrict: publicMode ? 'public' : 'private' })
 	}
-	getUserBookmarks(userId) {
+	getUserBookmarks(userId: Id): Promise<ApiResponse> {
 		return this.getJson('/v1/user/bookmarks/illust', { user_id: userId, restrict: 'public' })
 	}
-	getUserDetail(userId) {
+	getUserDetail(userId: Id): Promise<ApiResponse> {
 		return this.getJson('/v1/user/detail', { user_id: userId })
 	}
-	getUserMypixiv(userId) {
+	getUserMypixiv(userId: Id): Promise<ApiResponse> {
 		return this.getJson('/v1/user/mypixiv', { user_id: userId })
 	}
-	getUserFollowers(userId) {
+	getUserFollowers(userId: Id): Promise<ApiResponse> {
 		return this.getJson('/v1/user/follower', { user_id: userId })
 	}
-	getUserFollowings(userId) {
+	getUserFollowings(userId: Id): Promise<ApiResponse> {
 		return this.getJson('/v1/user/following', { user_id: userId })
 	}
-	getIllusts(userId) {
+	getIllusts(userId: Id): Promise<ApiResponse> {
 		return this.getJson('/v1/user/illusts', { user_id: userId, filter, type: 'illust' })
 	}
-	getNewIllusts() {
+	getNewIllusts(): Promise<ApiResponse> {
 		return this.getJson('/v1/illust/new')
 	}
-	getRecommendedIllusts({ includeRanking = true } = {}) {
+	getRecommendedIllusts({ includeRanking = true } = {}): Promise<ApiResponse> {
 		return this.getJson('/v1/illust/recommended', {
 			content_type: 'illust',
 			include_ranking_label: includeRanking,
 			filter
 		})
 	}
-	getFollowingIllusts() {
+	getFollowingIllusts(): Promise<ApiResponse> {
 		return this.getJson('/v2/illust/follow', { restrict: 'public' })
 	}
-	getIllustDetail(illustId) {
+	getIllustDetail(illustId: Id): Promise<ApiResponse> {
 		return this.getJson('/v1/illust/detail', { illust_id: illustId, filter })
 	}
-	getIllustComment(illustId) {
+	getIllustComment(illustId: Id): Promise<ApiResponse> {
 		return this.getJson('/v1/illust/comments', { illust_id: illustId, include_total_comments: true })
 	}
-	getIllustRelated(illustId) {
+	getIllustRelated(illustId: Id): Promise<ApiResponse> {
 		return this.getJson('/v2/illust/related', { illust_id: illustId, filter })
 	}
-	addBookmark(illustId, { publicMode = true } = {}) {
+	addBookmark(illustId: Id, { publicMode = true } = {}): Promise<ApiResponse> {
 		return this.postJson('/v2/illust/bookmark/add', {
 			illust_id: illustId,
 			restrict: publicMode ? 'public' : 'private'
 		})
 	}
-	deleteBookmark(illustId) {
+	deleteBookmark(illustId: Id): Promise<ApiResponse> {
 		return this.postJson('/v1/illust/bookmark/delete', {
 			illust_id: illustId
 		})
 	}
-	getRecommendedNovels({ includeRanking = true } = {}) {
+	getRecommendedNovels({ includeRanking = true } = {}): Promise<ApiResponse> {
 		return this.getJson('/v1/novel/recommended', {
 			include_ranking_novels: includeRanking,
 			filter
 		})
 	}
-	getRecommendedMangas({ includeRanking = true } = {}) {
+	getRecommendedMangas({ includeRanking = true } = {}): Promise<ApiResponse> {
 		return this.getJson('/v1/manga/recommended', {
 			include_ranking_label: includeRanking,
 			filter
 		})
 	}
-	static async auth({ username, password, refresh_token }) {
+	static async auth(opts: UsernameAuth | RefreshAuth) {
 		try {
-			const obj = {
+			const obj: Params = {
 				client_id: constants.client_id,
 				client_secret: constants.client_secret,
 				get_secure_url: 1
 			}
-			if (refresh_token) {
+			if ('refresh_token' in opts) {
 				obj.grant_type = 'refresh_token'
-				obj.refresh_token = refresh_token
 			} else {
 				obj.grant_type = 'password'
-				obj.username = username
-				obj.password = password
 			}
+			Object.assign(obj, opts) // assign ('username' & 'password') | ('refresh_token')
 			const resp = await got
 				.post('https://oauth.secure.pixiv.net/auth/token', {
 					body: obj2fd(obj),
@@ -186,10 +204,8 @@ class PixivMobileApi {
 			throw new Error('Login failed!')
 		}
 	}
-	static async login(opts) {
+	static async login(opts: { username: string; password: string }): Promise<PixivMobileApi> {
 		const oauthinfo = await PixivMobileApi.auth(opts)
 		return new PixivMobileApi(Object.assign({}, opts, { oauthinfo }))
 	}
 }
-
-module.exports = PixivMobileApi

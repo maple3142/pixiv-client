@@ -1,11 +1,10 @@
-exports.PixivDesktopApi = require('./desktopapi')
-exports.PixivMobileApi = require('./mobileapi')
+export { PixivDesktopApi } from './desktop'
+export { PixivMobileApi } from './mobile'
+import * as got from 'got'
+import * as fs from 'fs'
+import * as path from 'path'
 
-const got = require('got')
-const fs = require('fs')
-const path = require('path')
-
-exports.download = (url, absfilepath = '') => {
+export function download(url: string, absfilepath = '') {
 	const s = got.stream(url, {
 		headers: {
 			Referer: 'https://www.pixiv.net/'

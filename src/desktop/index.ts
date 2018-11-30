@@ -1,27 +1,34 @@
-const got = require('got')
-const cheerio = require('cheerio')
-const { CookieJar } = require('tough-cookie')
+import * as got from 'got'
+import * as cheerio from 'cheerio'
+import { CookieJar } from 'tough-cookie'
+import { Illust } from './illust'
 
 // Desktop Pixiv api docs: https://github.com/FlandreDaisuki/Patchouli/wiki/New-API-List
 
-class PixivDesktopApi {
-	constructor({ cookieJar }) {
+type Id = string | number
+
+export class PixivDesktopApi {
+	private cookieJar: CookieJar
+	private client: any
+	private _csrf: string
+	// static login(opts: LoginOption): Promise<PixivDesktopApi>
+	constructor({ cookieJar }: { cookieJar: CookieJar }) {
 		this.cookieJar = cookieJar
-		this.client = got.extend({ cookieJar, baseUrl: 'https://www.pixiv.net/' })
+		this.client = (<any>got).extend({ cookieJar, baseUrl: 'https://www.pixiv.net/' })
 	}
-	responseHandler(resp) {
+	private responseHandler(resp: got.Response<{ body?: any; error?: any }>) {
 		if (resp.body.error) {
 			throw resp
 		}
 		return resp.body.body || resp.body
 	}
-	getJson(url, opts) {
+	private getJson(url: string, opts?: any) {
 		return this.client.get(url, Object.assign({ json: true }, opts)).then(this.responseHandler)
 	}
-	postJson(url, opts) {
+	private postJson(url: string, opts?: any) {
 		return this.client.post(url, Object.assign({ json: true }, opts)).then(this.responseHandler)
 	}
-	async rpcCall(mode, params = {}) {
+	private async rpcCall(mode: string, params = {}) {
 		return this.postJson('/rpc/index.php', {
 			method: 'POST',
 			form: true,
@@ -33,11 +40,11 @@ class PixivDesktopApi {
 		if (this._csrf) {
 			return this._csrf
 		}
-		const $ = await this.client.get('/').then(r => cheerio.load(r.body))
+		const $ = await this.client.get('/').then((r: got.Response<string>) => cheerio.load(r.body))
 		// .text() cannot get script content in cheerio
 		const targetScript = $('script')
 			.toArray()
-			.find(s =>
+			.find((s: any) =>
 				$(s)
 					.html()
 					.includes('pixiv.context.token')
@@ -50,19 +57,19 @@ class PixivDesktopApi {
 		}, 60 * 1000) // reset after 60 seconds
 		return token
 	}
-	getIllustData(illustId) {
+	getIllustData(illustId: Id): Promise<Illust> {
 		return this.getJson(`/ajax/illust/${illustId}`)
 	}
-	getIllustBookmarkData(illustId) {
+	getIllustBookmarkData(illustId: Id): Promise<any> {
 		return this.getJson(`/ajax/illust/${illustId}/bookmarkData`)
 	}
-	getUserData(userId) {
+	getUserData(userId: Id): Promise<any> {
 		return this.getJson(`/ajax/user/${userId}`)
 	}
-	getUserProfileData(userId) {
+	getUserProfileData(userId: Id): Promise<any> {
 		return this.getJson(`/ajax/user/${userId}/profile/all`)
 	}
-	getUserBookmarkData(userId, optSearchParams = {}) {
+	getUserBookmarkData(userId: Id, optSearchParams = {}): Promise<any> {
 		return this.getJson(`/ajax/user/${userId}/illusts/bookmarks`, {
 			query: Object.assign(
 				{
@@ -75,10 +82,10 @@ class PixivDesktopApi {
 			)
 		})
 	}
-	getIllustUgoiraMetaData(illustId) {
+	getIllustUgoiraMetaData(illustId: Id): Promise<any> {
 		return this.getJson(`/ajax/illust/${illustId}/ugoira_meta`)
 	}
-	async postIllustLike(illustId) {
+	async postIllustLike(illustId: Id): Promise<any> {
 		const token = await this.getCsrf()
 		return this.postJson('/ajax/illusts/like', {
 			headers: {
@@ -87,9 +94,9 @@ class PixivDesktopApi {
 			body: {
 				illust_id: illustId
 			}
-		}).then(r => r.is_liked) // it means whether you like the illust `before` this action
+		}).then((r: any) => r.is_liked) // it means whether you like the illust `before` this action
 	}
-	async postFollowUser(userId) {
+	async postFollowUser(userId: Id): Promise<any> {
 		return this.postJson('/bookmark_add.php', {
 			form: true,
 			body: {
@@ -102,7 +109,7 @@ class PixivDesktopApi {
 			}
 		}).then(Boolean) // covert truthy/falsy value to boolean
 	}
-	postRPCAddBookmark(illustId) {
+	postRPCAddBookmark(illustId: Id): Promise<any> {
 		return this.rpcCall('save_illust_bookmark', {
 			comment: '',
 			illust_id: illustId,
@@ -110,12 +117,12 @@ class PixivDesktopApi {
 			tags: ''
 		}).then(() => true)
 	}
-	postRPCDeleteBookmark(bookmarkId) {
+	postRPCDeleteBookmark(bookmarkId: Id): Promise<any> {
 		return this.rpcCall('delete_illust_bookmark', { bookmark_id: bookmarkId }).then(() => true)
 	}
-	static async auth({ username, password }) {
+	static async auth({ username, password }: { username: string; password: string }) {
 		const cookieJar = new CookieJar()
-		const client = got.extend({
+		const client = (<any>got).extend({
 			cookieJar,
 			baseUrl: 'https://accounts.pixiv.net/',
 			headers: {
@@ -123,7 +130,7 @@ class PixivDesktopApi {
 				Referer: 'https://accounts.pixiv.net/'
 			}
 		})
-		const $ = await client.get('/login').then(r => cheerio.load(r.body))
+		const $ = await client.get('/login').then((r: got.Response<string>) => cheerio.load(r.body))
 		const post_key = $('input[name=post_key]').attr('value')
 		const resp = await client.post('/api/login', {
 			form: true,
@@ -139,9 +146,7 @@ class PixivDesktopApi {
 			throw new Error('Login failed!')
 		}
 	}
-	static async login(opts) {
+	static async login(opts: { username: string; password: string }) {
 		return new PixivDesktopApi({ cookieJar: await PixivDesktopApi.auth(opts) })
 	}
 }
-
-module.exports = PixivDesktopApi

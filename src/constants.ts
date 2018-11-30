@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	client_id: 'MOBrBDS8blbauoSck0ZfDbtuzpyT',
 	client_secret: 'lsACyCD94FhDUtGTXi3QzcFE2uU1hqtDaKeqrdwj',
 	maskHeaders: {
