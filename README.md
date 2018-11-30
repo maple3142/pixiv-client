@@ -33,6 +33,6 @@ const { PixivDesktopApi, PixivMobileApi, download } = require('pixiv-client')
 
 ## Documentation
 
-[Typescript definitions](./types)
+[Typescript definitions](types)
 
 > Although there is lots of undocumented api if you inspect the api client, you should not use it because it won't follow semver.
