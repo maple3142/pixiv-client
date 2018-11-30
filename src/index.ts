@@ -3,20 +3,23 @@ export { PixivMobileApi } from './mobile'
 import * as got from 'got'
 import * as fs from 'fs'
 import * as path from 'path'
+import { Duplex } from 'stream';
 
-export function download(url: string, absfilepath = '') {
-	const s = got.stream(url, {
+export function downloadAsStream(url: string):Duplex {
+	return got.stream(url, {
 		headers: {
 			Referer: 'https://www.pixiv.net/'
 		}
 	})
-	if (path.isAbsolute(absfilepath)) {
-		return new Promise((res, rej) => {
-			s.pipe(fs.createWriteStream(absfilepath))
-				.on('finish', () => res())
-				.on('error', rej)
-		})
-	} else {
-		return s
+}
+export function downloadToLocal(url: string, absfilepath= '') {
+	if(!path.isAbsolute(absfilepath)){
+		throw new TypeError('path must be absolute path!')
 	}
+	return new Promise((res, rej) => {
+		downloadAsStream(url)
+			.pipe(fs.createWriteStream(absfilepath))
+			.on('finish', () => res())
+			.on('error', rej)
+	})
 }

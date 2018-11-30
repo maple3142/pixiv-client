@@ -180,7 +180,7 @@ export class PixivMobileApi {
 			filter
 		})
 	}
-	static async auth(opts: UsernameAuth | RefreshAuth) {
+	private static async auth(opts: UsernameAuth | RefreshAuth) {
 		try {
 			const obj: Params = {
 				client_id: constants.client_id,

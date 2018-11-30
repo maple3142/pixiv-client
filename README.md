@@ -6,9 +6,9 @@
 
 ```js
 // ES6:
-import { PixivDesktopApi, PixivMobileApi, download } from 'pixiv-client'
+import { PixivDesktopApi, PixivMobileApi, downloadAsStream } from 'pixiv-client'
 // Commomjs:
-const { PixivDesktopApi, PixivMobileApi, download } = require('pixiv-client')
+const { PixivDesktopApi, PixivMobileApi, downloadAsStream } = require('pixiv-client')
 
 ;(async () => {
   const auth = {
@@ -17,11 +17,11 @@ const { PixivDesktopApi, PixivMobileApi, download } = require('pixiv-client')
   }
   const dc = await PixivDesktopApi.login(auth)
   const r = await dc.getIllustData(70337017)
-  download(r.urls.original).pipe(fs.createWriteStream(__dirname + 'test.png')) // or `await download(r.urls.original, __dirname + 'test.png')`
+  downloadAsStream(r.urls.original).pipe(fs.createWriteStream(__dirname + '/test.png')) // or `await downloadToLocal(r.urls.original, __dirname + '/test.png')`
   console.log(await dc.getUserProfileData(5323203))
   const mc = await PixivMobileApi.login(auth)
   console.log(await mc.getRanking('day'))
-  const bm = await mc.getUserBookmarks(mc.oauth.info.user)
+  const bm = await mc.getUserBookmarks(mc.oauth.info.user.id)
   if (mc.hasNext(bm)) {
     console.log(await mc.next(bm))
   }
@@ -33,6 +33,6 @@ const { PixivDesktopApi, PixivMobileApi, download } = require('pixiv-client')
 
 ## Documentation
 
-[Typescript definitions](types)
-
-> Although there is lots of undocumented api if you inspect the api client, you should not use it because it won't follow semver.
+* [index](src/index.ts)
+* [desktop api](src/desktop/index.ts)
+* [mobile api](src/mobile/index.ts)

@@ -35,7 +35,7 @@ export class PixivDesktopApi {
 			body: Object.assign(params, { mode, tt: await this.getCsrf() })
 		})
 	}
-	async getCsrf() {
+	private async getCsrf() {
 		// IMPURE
 		if (this._csrf) {
 			return this._csrf
@@ -120,7 +120,7 @@ export class PixivDesktopApi {
 	postRPCDeleteBookmark(bookmarkId: Id): Promise<any> {
 		return this.rpcCall('delete_illust_bookmark', { bookmark_id: bookmarkId }).then(() => true)
 	}
-	static async auth({ username, password }: { username: string; password: string }) {
+	private static async auth({ username, password }: { username: string; password: string }) {
 		const cookieJar = new CookieJar()
 		const client = (<any>got).extend({
 			cookieJar,
