@@ -149,7 +149,7 @@ export class PixivDesktopApi {
 	static async login(opts: { username: string; password: string }) {
 		return new PixivDesktopApi({ cookieJar: await PixivDesktopApi.auth(opts) })
 	}
-	static async withoutLogin() {
+	static withoutLogin() {
 		return new PixivDesktopApi({ cookieJar: new CookieJar() })
 	}
 }
