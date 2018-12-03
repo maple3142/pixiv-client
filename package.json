@@ -1,6 +1,6 @@
 {
 	"name": "pixiv-client",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"main": "dist/index.js",
 	"types": "types/index.d.ts",
 	"files": [
@@ -20,6 +20,10 @@
 		"@types/form-data": "^2.2.1",
 		"@types/got": "^9.2.1",
 		"typescript": "^3.2.1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/maple3142/pixiv-client.git"
 	},
 	"license": "MIT"
 }

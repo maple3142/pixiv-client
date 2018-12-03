@@ -1,6 +1,6 @@
 # pixiv-client
 
-> Pixiv api client written in node.js
+> Pixiv api client for node.js written in typescript.
 
 ## Example
 
