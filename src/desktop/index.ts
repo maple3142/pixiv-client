@@ -14,8 +14,9 @@ export class PixivDesktopApi {
 	// static login(opts: LoginOption): Promise<PixivDesktopApi>
 	constructor({ cookieJar }: { cookieJar: CookieJar }) {
 		this.cookieJar = cookieJar
-		this.client = (<any>got).extend({ cookieJar, baseUrl: 'https://www.pixiv.net/' })
+		this.client = got.extend({ cookieJar, baseUrl: 'https://www.pixiv.net/' })
 	}
+	// #region internal
 	private responseHandler(resp: got.Response<{ body?: any; error?: any }>) {
 		if (resp.body.error) {
 			throw resp
@@ -57,6 +58,8 @@ export class PixivDesktopApi {
 		}, 60 * 1000) // reset after 60 seconds
 		return token
 	}
+	// #endregion
+	// #region publicApis
 	getIllustData(illustId: Id): Promise<Illust> {
 		return this.getJson(`/ajax/illust/${illustId}`)
 	}
@@ -120,9 +123,10 @@ export class PixivDesktopApi {
 	postRPCDeleteBookmark(bookmarkId: Id): Promise<any> {
 		return this.rpcCall('delete_illust_bookmark', { bookmark_id: bookmarkId }).then(() => true)
 	}
+	// #endregion
 	private static async auth({ username, password }: { username: string; password: string }) {
 		const cookieJar = new CookieJar()
-		const client = (<any>got).extend({
+		const client = got.extend({
 			cookieJar,
 			baseUrl: 'https://accounts.pixiv.net/',
 			headers: {

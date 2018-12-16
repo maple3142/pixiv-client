@@ -2,7 +2,6 @@ import * as got from 'got'
 import * as FormData from 'form-data'
 import constants from '../constants'
 import {
-	UserData,
 	ApiResponse,
 	ExtendedSearchOption,
 	Params,
@@ -37,8 +36,9 @@ export class PixivMobileApi {
 		}
 		this.updateClientWithToken(this.oauth.info.access_token)
 	}
+	// #region internal
 	private updateClientWithToken(accessToken: string) {
-		this.client = (<any>got).extend({
+		this.client = got.extend({
 			headers: {
 				Authorization: `Bearer ${accessToken}`,
 				...constants.maskHeaders
@@ -66,6 +66,8 @@ export class PixivMobileApi {
 		await this.checkAndRefreshToken()
 		return this.client.post(url, { json: true, form: true, body: params }).then(this.responseHandler)
 	}
+	// #endregion internal
+	// #region publicApis
 	hasNext(resp: ApiResponse): boolean {
 		return !!resp.next_url
 	}
@@ -180,6 +182,7 @@ export class PixivMobileApi {
 			filter
 		})
 	}
+	// #endregion
 	private static async auth(opts: UsernameAuth | RefreshAuth) {
 		try {
 			const obj: Params = {

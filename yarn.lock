@@ -24,18 +24,11 @@
   dependencies:
     "@types/node" "*"
 
-"@types/got@^9.2.1":
-  version "9.2.1"
-  resolved "https://registry.yarnpkg.com/@types/got/-/got-9.2.1.tgz#962e5a041d66f8be484740d76a6ca15d2a8d141b"
-  dependencies:
-    "@types/node" "*"
-    "@types/tough-cookie" "*"
-
 "@types/node@*":
   version "10.12.10"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.12.10.tgz#4fa76e6598b7de3f0cb6ec3abacc4f59e5b3a2ce"
 
-"@types/tough-cookie@*":
+"@types/tough-cookie@^2.3.4":
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/@types/tough-cookie/-/tough-cookie-2.3.4.tgz#821878b81bfab971b93a265a561d54ea61f9059f"
 
