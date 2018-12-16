@@ -11,7 +11,6 @@ export class PixivDesktopApi {
 	private cookieJar: CookieJar
 	private client: any
 	private _csrf: string
-	// static login(opts: LoginOption): Promise<PixivDesktopApi>
 	constructor({ cookieJar }: { cookieJar: CookieJar }) {
 		this.cookieJar = cookieJar
 		this.client = got.extend({ cookieJar, baseUrl: 'https://www.pixiv.net/' })
