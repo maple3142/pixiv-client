@@ -49,7 +49,7 @@ export interface ApiResponse {
 	next_url: string | null
 	[key: string]: any
 }
-export interface RankingOrSearchResponse extends ApiResponse {
+export interface WithIllustsList extends ApiResponse {
 	illusts: [Illust]
 }
 export interface IllustResponse extends ApiResponse {

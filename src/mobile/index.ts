@@ -6,7 +6,7 @@ import {
 	ExtendedSearchOption,
 	Params,
 	RankingMode,
-	RankingOrSearchResponse,
+	WithIllustsList,
 	UsernameAuth,
 	RefreshAuth,
 	Oauth
@@ -77,7 +77,7 @@ export class PixivMobileApi {
 	searchIllusts(
 		keyword: string,
 		{ searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration }: ExtendedSearchOption
-	): Promise<RankingOrSearchResponse> {
+	): Promise<WithIllustsList> {
 		const query: Params = {
 			word: keyword,
 			search_target: searchTarget,
@@ -92,7 +92,7 @@ export class PixivMobileApi {
 	searchPopularIllusts(
 		keyword: string,
 		{ searchTarget = 'partial_match_for_tags' } = {}
-	): Promise<RankingOrSearchResponse> {
+	): Promise<WithIllustsList> {
 		const query = {
 			word: keyword,
 			search_target: searchTarget,
@@ -103,7 +103,7 @@ export class PixivMobileApi {
 	searchUsers(keyword: string): Promise<ApiResponse> {
 		return this.getJson('/v1/search/user', { word: keyword, filter })
 	}
-	getRanking(mode: RankingMode, date?: Date): Promise<RankingOrSearchResponse> {
+	getRanking(mode: RankingMode, date?: Date): Promise<WithIllustsList> {
 		const query: Params = {
 			mode,
 			filter
@@ -119,7 +119,7 @@ export class PixivMobileApi {
 	getBookmarkTags(publicMode = true): Promise<ApiResponse> {
 		return this.getJson('/v1/user/bookmark-tags/illust', { restrict: publicMode ? 'public' : 'private' })
 	}
-	getUserBookmarks(userId: Id): Promise<ApiResponse> {
+	getUserBookmarks(userId: Id): Promise<WithIllustsList> {
 		return this.getJson('/v1/user/bookmarks/illust', { user_id: userId, restrict: 'public' })
 	}
 	getUserDetail(userId: Id): Promise<ApiResponse> {
