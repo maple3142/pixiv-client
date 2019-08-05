@@ -76,13 +76,14 @@ export class PixivMobileApi {
 	}
 	searchIllusts(
 		keyword: string,
-		{ searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration }: ExtendedSearchOption
+		{ searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration, offset }: ExtendedSearchOption
 	): Promise<WithIllustsList> {
 		const query: Params = {
 			word: keyword,
 			search_target: searchTarget,
 			sort,
-			filter
+			filter,
+			offset
 		}
 		if (duration) {
 			query.duration = duration

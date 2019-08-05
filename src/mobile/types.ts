@@ -40,9 +40,10 @@ export type RankingMode =
 	| 'week_r18g'
 export interface SearchOption {
 	searchTarget?: 'partial_match_for_tags' | 'exact_match_for_tags' | 'title_and_caption'
+	offset?: number
 }
 export interface ExtendedSearchOption extends SearchOption {
-	sort?: 'date_desc' | 'date_asc'
+	sort?: 'date_desc' | 'date_asc' | 'popular_desc' | 'popular_asc'
 	duration?: 'within_last_day' | 'within_last_week' | 'within_last_month'
 }
 export interface ApiResponse {
