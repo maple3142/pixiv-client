@@ -47,14 +47,16 @@ export interface ExtendedSearchOption extends SearchOption {
 	duration?: 'within_last_day' | 'within_last_week' | 'within_last_month'
 }
 export interface ApiResponse {
-	next_url: string | null
 	[key: string]: any
 }
-export interface WithIllustsList extends ApiResponse {
-	illusts: [Illust]
+export interface Nextable {
+	next_url: string | null
 }
 export interface IllustResponse extends ApiResponse {
 	illust: Illust
+}
+export interface IllustListResponse extends ApiResponse, Nextable {
+	illusts: [Illust]
 }
 export interface Params{
 	[key: string]: string | number

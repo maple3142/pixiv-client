@@ -7,10 +7,11 @@ import {
 	ExtendedSearchOption,
 	Params,
 	RankingMode,
-	WithIllustsList,
+	IllustListResponse,
 	UsernameAuth,
 	RefreshAuth,
-	Oauth
+	Oauth,
+	Nextable
 } from './types'
 import LoginError from '../LoginError'
 
@@ -70,16 +71,22 @@ export class PixivMobileApi {
 	}
 	// #endregion internal
 	// #region publicApis
-	hasNext(resp: ApiResponse): boolean {
-		return !!resp.next_url
-	}
-	next(resp: ApiResponse): Promise<ApiResponse> {
-		return this.getJson(resp.next_url)
+	makeIterable<T extends Nextable>(resp: T): AsyncIterable<T> {
+		const self = this
+		return {
+			[Symbol.asyncIterator]: async function*() {
+				yield resp
+				while (resp.next_url) {
+					resp = await self.getJson(resp.next_url)
+					yield resp
+				}
+			}
+		}
 	}
 	searchIllusts(
 		keyword: string,
 		{ searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration, offset }: ExtendedSearchOption
-	): Promise<WithIllustsList> {
+	): Promise<IllustListResponse> {
 		const query: Params = {
 			word: keyword,
 			search_target: searchTarget,
@@ -92,7 +99,10 @@ export class PixivMobileApi {
 		}
 		return this.getJson('/v1/search/illust', query)
 	}
-	searchPopularIllusts(keyword: string, { searchTarget = 'partial_match_for_tags' } = {}): Promise<WithIllustsList> {
+	searchPopularIllusts(
+		keyword: string,
+		{ searchTarget = 'partial_match_for_tags' } = {}
+	): Promise<IllustListResponse> {
 		const query = {
 			word: keyword,
 			search_target: searchTarget,
@@ -103,7 +113,7 @@ export class PixivMobileApi {
 	searchUsers(keyword: string): Promise<ApiResponse> {
 		return this.getJson('/v1/search/user', { word: keyword, filter })
 	}
-	getRanking(mode: RankingMode, date?: Date): Promise<WithIllustsList> {
+	getRanking(mode: RankingMode, date?: Date): Promise<IllustListResponse> {
 		const query: Params = {
 			mode,
 			filter
@@ -119,7 +129,7 @@ export class PixivMobileApi {
 	getBookmarkTags(publicMode = true): Promise<ApiResponse> {
 		return this.getJson('/v1/user/bookmark-tags/illust', { restrict: publicMode ? 'public' : 'private' })
 	}
-	getUserBookmarks(userId: Id): Promise<WithIllustsList> {
+	getUserBookmarks(userId: Id): Promise<IllustListResponse> {
 		return this.getJson('/v1/user/bookmarks/illust', { user_id: userId, restrict: 'public' })
 	}
 	getUserDetail(userId: Id): Promise<ApiResponse> {
@@ -185,12 +195,12 @@ export class PixivMobileApi {
 	// #endregion
 	private static async auth(opts: UsernameAuth | RefreshAuth) {
 		try {
-			const local_time = new Date().toISOString()
+			const localTime = new Date().toISOString()
 			const clientHeaders = {
-				'X-Client-Time': local_time,
+				'X-Client-Time': localTime,
 				'X-Client-Hash': crypto
 					.createHash('md5')
-					.update(new Buffer(`${local_time}${constants.hash_secret}`, 'utf8'))
+					.update(`${localTime}${constants.hash_secret}`)
 					.digest('hex')
 			}
 			const obj: Params = {
@@ -200,10 +210,12 @@ export class PixivMobileApi {
 			}
 			if ('refresh_token' in opts) {
 				obj.grant_type = 'refresh_token'
+				obj.refresh_token = opts.refresh_token
 			} else {
 				obj.grant_type = 'password'
+				obj.username = opts.username
+				obj.password = opts.password
 			}
-			Object.assign(obj, opts) // assign ('username' & 'password') | ('refresh_token')
 			const resp = await got
 				.post('https://oauth.secure.pixiv.net/auth/token', {
 					body: obj2fd(obj),
