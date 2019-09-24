@@ -15,7 +15,7 @@ const { PixivDesktopApi, PixivMobileApi, downloadAsStream } = require('pixiv-cli
     username: 'USERNAME',
     password: 'PASSWORD'
   }
-  const dc = await PixivDesktopApi.login(auth)
+  const dc = await PixivDesktopApi.create() // no after-login function in PixivDesktopApi
   const r = await dc.getIllustData(70337017)
   downloadAsStream(r.urls.original).pipe(fs.createWriteStream(__dirname + '/test.png')) // or `await downloadToLocal(r.urls.original, __dirname + '/test.png')`
   console.log(await dc.getUserProfileData(5323203))
