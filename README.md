@@ -11,23 +11,29 @@ import { PixivDesktopApi, PixivMobileApi, downloadAsStream } from 'pixiv-client'
 const { PixivDesktopApi, PixivMobileApi, downloadAsStream } = require('pixiv-client')
 
 ;(async () => {
-  const auth = {
-    username: 'USERNAME',
-    password: 'PASSWORD'
-  }
+  // Desktop api examples
   const dc = await PixivDesktopApi.create() // no after-login function in PixivDesktopApi
   const r = await dc.getIllustData(70337017)
   downloadAsStream(r.urls.original).pipe(fs.createWriteStream(__dirname + '/test.png')) // or `await downloadToLocal(r.urls.original, __dirname + '/test.png')`
   console.log(await dc.getUserProfileData(5323203))
-  const mc = await PixivMobileApi.login(auth)
+
+  // Mobile api examples
+  const mc = await PixivMobileApi.login({
+    username: 'USERNAME',
+    password: 'PASSWORD'
+  })
   console.log(await mc.getRanking('day'))
-  const bm = await mc.getUserBookmarks(mc.oauth.info.user.id)
-  if (mc.hasNext(bm)) {
-    console.log(await mc.next(bm))
+  console.log((await mc.getUserBookmarks(mc.oauth.info.user.id)).illusts)
+
+  // Working with async iterator
+  const ar = []
+  const result = await c.searchIllusts('ノゾミ(プリコネ)', {
+    searchTarget: 'exact_match_for_tags'
+  })
+  for await (const r of c.makeIterable(result)){
+    ar.push(...r.illusts)
   }
-  else{
-    console.log(bm)
-  }
+  console.log(ar.length)
 })()
 ```
 
