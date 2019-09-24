@@ -2,6 +2,7 @@ import * as got from 'got'
 import * as cheerio from 'cheerio'
 import { CookieJar } from 'tough-cookie'
 import { Illust } from './illust'
+import LoginError from '../LoginError'
 
 // Desktop Pixiv api docs: https://github.com/FlandreDaisuki/Patchouli/wiki/New-API-List
 
@@ -146,7 +147,7 @@ export class PixivDesktopApi {
 		if ('set-cookie' in resp.headers) {
 			return cookieJar
 		} else {
-			throw new Error('Login failed!')
+			throw new LoginError(resp)
 		}
 	}
 	static async login(opts: { username: string; password: string }) {

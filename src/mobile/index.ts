@@ -1,3 +1,4 @@
+import * as crypto from 'crypto'
 import * as got from 'got'
 import * as FormData from 'form-data'
 import constants from '../constants'
@@ -11,6 +12,7 @@ import {
 	RefreshAuth,
 	Oauth
 } from './types'
+import LoginError from '../LoginError'
 
 // Mobile Pixiv api reference: https://github.com/upbit/pixivpy/wiki
 
@@ -90,10 +92,7 @@ export class PixivMobileApi {
 		}
 		return this.getJson('/v1/search/illust', query)
 	}
-	searchPopularIllusts(
-		keyword: string,
-		{ searchTarget = 'partial_match_for_tags' } = {}
-	): Promise<WithIllustsList> {
+	searchPopularIllusts(keyword: string, { searchTarget = 'partial_match_for_tags' } = {}): Promise<WithIllustsList> {
 		const query = {
 			word: keyword,
 			search_target: searchTarget,
@@ -186,6 +185,14 @@ export class PixivMobileApi {
 	// #endregion
 	private static async auth(opts: UsernameAuth | RefreshAuth) {
 		try {
+			const local_time = new Date().toISOString()
+			const clientHeaders = {
+				'X-Client-Time': local_time,
+				'X-Client-Hash': crypto
+					.createHash('md5')
+					.update(new Buffer(`${local_time}${constants.hash_secret}`, 'utf8'))
+					.digest('hex')
+			}
 			const obj: Params = {
 				client_id: constants.client_id,
 				client_secret: constants.client_secret,
@@ -200,12 +207,12 @@ export class PixivMobileApi {
 			const resp = await got
 				.post('https://oauth.secure.pixiv.net/auth/token', {
 					body: obj2fd(obj),
-					headers: constants.maskHeaders
+					headers: Object.assign({}, constants.maskHeaders, clientHeaders)
 				})
 				.then(r => JSON.parse(r.body))
 			return resp.response
 		} catch (e) {
-			throw new Error('Login failed!')
+			throw new LoginError(e)
 		}
 	}
 	static async login(opts: { username: string; password: string }): Promise<PixivMobileApi> {

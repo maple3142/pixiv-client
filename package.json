@@ -13,7 +13,7 @@
 		"cheerio": "^1.0.0-rc.2",
 		"form-data": "^2.3.3",
 		"got": "^9.3.2",
-		"tough-cookie": "^2.4.3"
+		"tough-cookie": "^3.0.1"
 	},
 	"devDependencies": {
 		"@types/cheerio": "^0.22.10",
