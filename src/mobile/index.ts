@@ -32,7 +32,13 @@ type Id = string | number
 export class PixivMobileApi {
 	public oauth: Oauth
 	private client: any
-	constructor({ oauthinfo }: { username: string; password: string; oauthinfo: any }) {
+	constructor({
+		oauthinfo
+	}: {
+		username: string
+		password: string
+		oauthinfo: any
+	}) {
 		this.oauth = {
 			info: oauthinfo,
 			time: Date.now()
@@ -50,7 +56,9 @@ export class PixivMobileApi {
 		})
 	}
 	async checkAndRefreshToken() {
-		const tokenHasExpired = Date.now() - this.oauth.time > this.oauth.info.expires_in * 1000 * 0.9
+		const tokenHasExpired =
+			Date.now() - this.oauth.time >
+			this.oauth.info.expires_in * 1000 * 0.9
 		if (tokenHasExpired) {
 			this.oauth.info = await PixivMobileApi.auth({
 				refresh_token: this.oauth.info.refresh_token
@@ -63,11 +71,15 @@ export class PixivMobileApi {
 	}
 	async getJson(url: string, query?: object) {
 		await this.checkAndRefreshToken()
-		return this.client.get(url, { json: true, query }).then(this.responseHandler)
+		return this.client
+			.get(url, { json: true, query })
+			.then(this.responseHandler)
 	}
 	async postJson(url: string, params?: object) {
 		await this.checkAndRefreshToken()
-		return this.client.post(url, { json: true, form: true, body: params }).then(this.responseHandler)
+		return this.client
+			.post(url, { json: true, form: true, body: params })
+			.then(this.responseHandler)
 	}
 	// #endregion internal
 	// #region publicApis
@@ -85,7 +97,12 @@ export class PixivMobileApi {
 	}
 	searchIllusts(
 		keyword: string,
-		{ searchTarget = 'partial_match_for_tags', sort = 'date_desc', duration, offset }: ExtendedSearchOption
+		{
+			searchTarget = 'partial_match_for_tags',
+			sort = 'date_desc',
+			duration,
+			offset
+		}: ExtendedSearchOption
 	): Promise<IllustListResponse> {
 		const query: Params = {
 			word: keyword,
@@ -119,7 +136,8 @@ export class PixivMobileApi {
 			filter
 		}
 		if (date) {
-			query.date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+			query.date = `${date.getFullYear()}-${date.getMonth() +
+				1}-${date.getDate()}`
 		}
 		return this.getJson('/v1/illust/ranking', query)
 	}
@@ -127,10 +145,15 @@ export class PixivMobileApi {
 		return this.getJson('/v1/trending-tags/illust', { filter })
 	}
 	getBookmarkTags(publicMode = true): Promise<ApiResponse> {
-		return this.getJson('/v1/user/bookmark-tags/illust', { restrict: publicMode ? 'public' : 'private' })
+		return this.getJson('/v1/user/bookmark-tags/illust', {
+			restrict: publicMode ? 'public' : 'private'
+		})
 	}
 	getUserBookmarks(userId: Id): Promise<IllustListResponse> {
-		return this.getJson('/v1/user/bookmarks/illust', { user_id: userId, restrict: 'public' })
+		return this.getJson('/v1/user/bookmarks/illust', {
+			user_id: userId,
+			restrict: 'public'
+		})
 	}
 	getUserDetail(userId: Id): Promise<ApiResponse> {
 		return this.getJson('/v1/user/detail', { user_id: userId })
@@ -145,12 +168,18 @@ export class PixivMobileApi {
 		return this.getJson('/v1/user/following', { user_id: userId })
 	}
 	getIllusts(userId: Id): Promise<ApiResponse> {
-		return this.getJson('/v1/user/illusts', { user_id: userId, filter, type: 'illust' })
+		return this.getJson('/v1/user/illusts', {
+			user_id: userId,
+			filter,
+			type: 'illust'
+		})
 	}
 	getNewIllusts(): Promise<ApiResponse> {
 		return this.getJson('/v1/illust/new')
 	}
-	getRecommendedIllusts({ includeRanking = true } = {}): Promise<ApiResponse> {
+	getRecommendedIllusts({ includeRanking = true } = {}): Promise<
+		ApiResponse
+	> {
 		return this.getJson('/v1/illust/recommended', {
 			content_type: 'illust',
 			include_ranking_label: includeRanking,
@@ -161,15 +190,27 @@ export class PixivMobileApi {
 		return this.getJson('/v2/illust/follow', { restrict: 'public' })
 	}
 	getIllustDetail(illustId: Id): Promise<ApiResponse> {
-		return this.getJson('/v1/illust/detail', { illust_id: illustId, filter })
+		return this.getJson('/v1/illust/detail', {
+			illust_id: illustId,
+			filter
+		})
 	}
 	getIllustComment(illustId: Id): Promise<ApiResponse> {
-		return this.getJson('/v1/illust/comments', { illust_id: illustId, include_total_comments: true })
+		return this.getJson('/v1/illust/comments', {
+			illust_id: illustId,
+			include_total_comments: true
+		})
 	}
 	getIllustRelated(illustId: Id): Promise<ApiResponse> {
-		return this.getJson('/v2/illust/related', { illust_id: illustId, filter })
+		return this.getJson('/v2/illust/related', {
+			illust_id: illustId,
+			filter
+		})
 	}
-	addBookmark(illustId: Id, { publicMode = true } = {}): Promise<ApiResponse> {
+	addBookmark(
+		illustId: Id,
+		{ publicMode = true } = {}
+	): Promise<ApiResponse> {
 		return this.postJson('/v2/illust/bookmark/add', {
 			illust_id: illustId,
 			restrict: publicMode ? 'public' : 'private'
@@ -195,7 +236,18 @@ export class PixivMobileApi {
 	// #endregion
 	private static async auth(opts: UsernameAuth | RefreshAuth) {
 		try {
-			const localTime = new Date().toISOString()
+			const now_time = new Date()
+			const localTime = `${now_time.getUTCFullYear()}-${now_time.getUTCMonth() +
+				1}-${now_time.getUTCDate()}T${now_time
+				.getUTCHours()
+				.toString()
+				.padStart(2, '0')}:${now_time
+				.getUTCMinutes()
+				.toString()
+				.padStart(2, '0')}:${now_time
+				.getUTCSeconds()
+				.toString()
+				.padStart(2, '0')}+00:00`
 			const clientHeaders = {
 				'X-Client-Time': localTime,
 				'X-Client-Hash': crypto
@@ -219,7 +271,11 @@ export class PixivMobileApi {
 			const resp = await got
 				.post('https://oauth.secure.pixiv.net/auth/token', {
 					body: obj2fd(obj),
-					headers: Object.assign({}, constants.maskHeaders, clientHeaders)
+					headers: Object.assign(
+						{},
+						constants.maskHeaders,
+						clientHeaders
+					)
 				})
 				.then(r => JSON.parse(r.body))
 			return resp.response
@@ -227,7 +283,10 @@ export class PixivMobileApi {
 			throw new LoginError(e)
 		}
 	}
-	static async login(opts: { username: string; password: string }): Promise<PixivMobileApi> {
+	static async login(opts: {
+		username: string
+		password: string
+	}): Promise<PixivMobileApi> {
 		const oauthinfo = await PixivMobileApi.auth(opts)
 		return new PixivMobileApi(Object.assign({}, opts, { oauthinfo }))
 	}
